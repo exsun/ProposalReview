@@ -1,0 +1,50 @@
+@page "/"
+@inject HttpClient Http
+@using Shared.Models
+
+<h3 class="text-center mb-4">ارسال پیشنهاد</h3>
+
+<EditForm Model="@proposal" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="title">عنوان پیشنهاد:</label>
+        <InputText id="title" class="form-control" @bind-Value="proposal.Title" />
+    </div>
+
+    <div class="form-group">
+        <label for="proposalText">شرح پیشنهاد:</label>
+        <InputTextArea id="proposalText" class="form-control" @bind-Value="proposal.ProposalText" />
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">ارسال پیشنهاد</button>
+</EditForm>
+
+@if (isSuccess.HasValue)
+{
+    <div class="alert @(isSuccess.Value ? "alert-success" : "alert-danger") mt-4">
+        @if (isSuccess.Value)
+        {
+            <p>پیشنهاد با موفقیت ارسال شد!</p>
+        }
+        else
+        {
+            <p>خطا در ارسال پیشنهاد. لطفاً دوباره تلاش کنید.</p>
+        }
+    </div>
+}
+
+@code {
+    private Proposal proposal = new Proposal();
+    private bool? isSuccess;
+
+    private async Task HandleSubmit()
+    {
+        Console.WriteLine($"Title = {proposal.Title}");
+        var response = await Http.PostAsJsonAsync("api/proposals/submit", proposal);
+        isSuccess = response.IsSuccessStatusCode;
+        Console.WriteLine($"response = {response}");
+
+    }
+}

@@ -1,0 +1,61 @@
+@page "/review-proposal"
+@inject HttpClient Http
+@using Shared.Models
+
+<h3 class="text-center mb-4">بررسی پیشنهاد</h3>
+
+<EditForm Model="@review" OnValidSubmit="HandleReviewSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="proposalId">شناسه پیشنهاد:</label>
+        <InputNumber id="proposalId" class="form-control" @bind-Value="review.ProposalId" /> 
+    </div>
+
+    <div class="form-group">
+        <label for="score">امتیاز:</label>
+        <InputNumber id="score" class="form-control" @bind-Value="review.Score" /> 
+    </div>
+
+    <div class="form-group">
+        <label for="comments">توضیحات:</label>
+        <InputTextArea id="comments" class="form-control" @bind-Value="review.Comments" />
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">ثبت بررسی</button>
+</EditForm>
+
+@if (isReviewSuccess.HasValue)
+{
+    <div class="alert @(isReviewSuccess.Value ? "alert-success" : "alert-danger") mt-4">
+        @if (isReviewSuccess.Value)
+        {
+            <p>بررسی با موفقیت ثبت شد!</p>
+        }
+        else
+        {
+            <p>خطا در ثبت بررسی. لطفاً دوباره تلاش کنید.</p>
+        }
+    </div>
+}
+
+@code {
+    private ReviewModel review = new ReviewModel();
+    private bool? isReviewSuccess;
+
+    private async Task HandleReviewSubmit()
+    {
+        // Send only ProposalId and Scoring data in the request body
+        var scoring = new ScoringModel { 
+            ProposalId = review.ProposalId, 
+            Score = review.Score, 
+            Comments = review.Comments 
+        };
+
+        var response = await Http.PostAsJsonAsync("api/Reviews/add", scoring); 
+        isReviewSuccess = response.IsSuccessStatusCode;
+    }
+
+    
+}
